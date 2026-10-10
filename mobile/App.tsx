@@ -196,7 +196,8 @@ export default function App() {
                 title="Disco do Windows"
                 percent={stats.disk_percent}
                 detail={`${stats.disk_used_gib.toFixed(1)} / ${stats.disk_total_gib.toFixed(1)} GiB ocupados`}
-              />                           {stats.gpus.map((gpu) => (
+             />
+             {stats.gpus.map((gpu) => (
                 <MetricCard
                   key={gpu.id}
                   title={gpu.name}
