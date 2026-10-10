@@ -1,0 +1,27 @@
+# Ambiente Python e arquivos gerados
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Configuracoes locais e segredos
+.env
+.env.*
+!.env.example
+credentials.json
+*.jks
+*.keystore
+*.p12
+
+# Dependencias e builds mobile
+node_modules/
+.expo/
+dist/
+*.apk
+*.aab
+
+# Logs e arquivos do sistema
+*.log
+Thumbs.db
+.DS_Store
