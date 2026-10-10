@@ -1,32 +1,39 @@
-# Conectar o Android ao PcXStats
+# Instalar e conectar o PcX Control
 
-O código da integração passou nas verificações de TypeScript e ESLint. A API foi testada localmente; este roteiro serve para validar a conexão real no celular.
+Este guia cobre a versão Android 0.1.0 e o agente para Windows. O APK funciona sem Expo Go; as métricas dependem do agente executado no PC.
 
-## 1. Preparar a rede
+## 1. Requisitos
 
-PC e celular devem estar na mesma rede local. O PC pode usar cabo Ethernet e o celular Wi-Fi do mesmo roteador. Evite a rede de convidados, que pode isolar os dispositivos.
+- PC Windows com Python. O ambiente confirmado utiliza Python 3.13.14.
+- Celular Android. O modelo e a versão usados no teste ainda precisam ser registrados em [testes.md](testes.md).
+- PC e celular na mesma rede local confiável; o computador pode estar no cabo e o celular no Wi-Fi do mesmo roteador.
+- Código do repositório disponível no computador.
 
-Na verificação de 10/10/2026, o IPv4 do PC era `192.168.1.70` e o perfil Ethernet estava como Público. O IP pode mudar; confirme com `ipconfig` quando necessário.
+Para usar o APK pronto, Node.js e Expo Go não são necessários. Eles são usados no [desenvolvimento](desenvolvimento.md).
 
-**Somente se esta for sua rede doméstica confiável**, abra PowerShell como administrador e prepare o perfil privado e a regra local de desenvolvimento:
+## 2. Obter o código
+
+No GitHub Desktop, use **File → Clone repository → URL**, informe `https://github.com/Owaleee/PcXStats.git` e escolha a pasta local.
+
+Abra um PowerShell na raiz da pasta clonada. Ela deve conter as pastas `agente` e `mobile`.
+
+## 3. Preparar o Python uma vez
+
+Execute cada comando separadamente, na raiz:
 
 ```powershell
-Set-NetConnectionProfile -InterfaceAlias "Ethernet" -NetworkCategory Private
+py -3.13 -m venv .venv
 ```
 
 ```powershell
-New-NetFirewallRule -Name "PcXStats-Dev-LAN" -DisplayName "PcXStats - desenvolvimento local" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 8000,8081 -Profile Private -RemoteAddress LocalSubnet
+.\.venv\Scripts\python.exe -m pip install -r agente\requirements.lock.txt
 ```
 
-Essa preparação é feita uma vez; não recrie a regra a cada execução. Ela permite API e Metro somente no perfil privado e para a sub-rede local. Os próximos terminais podem ser normais, sem administrador.
+Os comandos usam diretamente o Python da `.venv`; não é necessário ativar o ambiente. Se o launcher `py` não encontrar o Python 3.13, confira a instalação antes de continuar.
 
-## 2. Terminal 1 — agente Python
+## 4. Gerar a chave e iniciar o agente
 
-Abra um PowerShell no VS Code. Se outro servidor estiver ocupando esse terminal, pare-o com Ctrl+C. Execute cada comando separadamente:
-
-```powershell
-cd "C:\Users\owale\OneDrive\Documents\GitHub\PcXStats"
-```
+No mesmo PowerShell:
 
 ```powershell
 $env:PCSTATS_TOKEN = & .\.venv\Scripts\python.exe -c "import secrets; print(secrets.token_hex(32))"
@@ -36,46 +43,92 @@ $env:PCSTATS_TOKEN = & .\.venv\Scripts\python.exe -c "import secrets; print(secr
 Write-Output $env:PCSTATS_TOKEN
 ```
 
-Copie a chave exibida para informar no aplicativo. Esse comando gera uma chave nova: uma autorização antiga deixa de corresponder ao novo agente. Não publique a chave.
+Copie a chave exibida. O comando gera 64 caracteres hexadecimais aleatórios. O agente exige pelo menos 32 caracteres ASCII.
 
 ```powershell
 .\.venv\Scripts\python.exe -m uvicorn main:app --app-dir agente --host 0.0.0.0 --port 8000
 ```
 
-Deixe este terminal aberto. `0.0.0.0` permite escutar na rede; não é o IP a digitar no celular.
+Deixe o terminal aberto. A mensagem `Uvicorn running on http://0.0.0.0:8000` indica que o servidor está aguardando consultas. `0.0.0.0` é o endereço de escuta, não o endereço a informar no aplicativo.
 
-## 3. Testar a API no navegador do celular
+Para parar, pressione `Ctrl + C`. Isso preserva a variável da chave nesse terminal. Fechar o terminal encerra essa configuração; na próxima sessão será preciso definir a chave novamente. Gerar uma chave nova exige atualizar o valor no app.
 
-Abra [http://192.168.1.70:8000/health](http://192.168.1.70:8000/health).
+## 5. Descobrir o IPv4 do PC
 
-O esperado é `{"status":"ok"}`. Se não abrir, resolva IP, rede, agente e firewall antes de testar o painel. Não use `localhost` ou `127.0.0.1` no celular.
-
-## 4. Terminal 2 — Expo
-
-Abra um segundo terminal pelo botão `+` do VS Code. O primeiro continua executando o agente. Digite:
+Em outro terminal:
 
 ```powershell
-cd "C:\Users\owale\OneDrive\Documents\GitHub\PcXStats\mobile"
+ipconfig
 ```
 
-O caminho deve terminar em `PcXStats\mobile`, com apenas uma pasta mobile. A pasta `mobile\mobile` encontrada na revisão estava vazia e não é a raiz do aplicativo.
+Procure o IPv4 da conexão Ethernet ou Wi-Fi que está em uso. Um exemplo ilustrativo é `192.168.1.10`; use o endereço real do seu computador.
+
+No próprio PC, abra `http://127.0.0.1:8000/health`. No navegador do celular, abra `http://IP_DO_PC:8000/health`, substituindo `IP_DO_PC` pelo endereço encontrado.
+
+O resultado esperado é:
+
+```json
+{"status":"ok"}
+```
+
+No celular, `localhost` e `127.0.0.1` apontam para o próprio celular. Por isso, use o IPv4 do computador.
+
+## 6. Ajustar o firewall se o celular não alcançar a API
+
+Se `/health` funciona no PC, mas não no celular, confira primeiro o IP, o servidor e se os dispositivos estão na mesma rede. Redes de convidados podem impedir a comunicação entre aparelhos.
+
+Em uma rede doméstica confiável, o perfil de rede do Windows pode ser configurado como **Privado** nas configurações da conexão. Não faça essa mudança em uma rede pública para usar o aplicativo.
+
+Se ainda for necessário liberar a porta, abra um PowerShell como administrador e confira se a regra já existe:
 
 ```powershell
-npx.cmd expo start --go --lan
+Get-NetFirewallRule -Name "PcXControl-API-LAN" -ErrorAction SilentlyContinue
 ```
 
-Deixe o terminal aberto. No Android, abra Expo Go compatível com o SDK 57 e escaneie o QR code do terminal. Se o comando informar que a porta 8081 está ocupada, encerre o Metro anterior antes de reiniciar na porta padrão usada pela regra acima.
+Somente se não existir uma regra adequada, crie:
 
-## 5. Conectar no aplicativo
+```powershell
+New-NetFirewallRule -Name "PcXControl-API-LAN" -DisplayName "PcX Control - API local" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 8000 -Profile Private -RemoteAddress LocalSubnet
+```
 
-- IPv4 do PC: `192.168.1.70` (ou o endereço atual confirmado).
-- Chave de acesso: cole somente a chave gerada no terminal 1.
-- Toque em Conectar.
+A regra permite a porta 8000 apenas no perfil privado e para a sub-rede local. A regra antiga `PcXStats-Dev-LAN`, criada durante o curso, também pode já permitir esse acesso; não é necessário duplicá-la.
 
-O esperado é status Conectado, CPU/RAM/disco reais e horário da última leitura mudando. A tela atual ainda não possui GPU.
+Não desative o firewall nem configure redirecionamento de porta no roteador para esta demonstração.
 
-Se aparecer chave inválida, desconecte, confira a chave do agente em execução e conecte novamente. Se aparecer falha de rede, repita o teste de `/health` no navegador do celular.
+## 7. Instalar o APK
 
-## 6. Registrar a validação
+1. No navegador do Android, abra a [build testada no Expo](https://expo.dev/accounts/owaleez/projects/pcx-control/builds/dee632f9-b783-4d0d-996f-04ed78fc77ba).
+2. Use a opção de instalação/download para obter o APK.
+3. Abra o arquivo baixado.
+4. Se solicitado, permita a instalação por esse navegador e conclua a instalação.
+5. Abra o aplicativo pelo ícone **PcX Control**.
 
-Anote modelo do aparelho, Android, data e resultado. Teste também parar o agente, observar dados antigos/erro e reiniciar com a mesma chave para verificar recuperação. Nenhum desses testes físicos deve ser marcado como aprovado apenas pela checagem de código.
+Essa é uma build de demonstração distribuída diretamente. A release no GitHub será adicionada posteriormente. O fluxo de instalação por APK está descrito na [documentação do Expo](https://docs.expo.dev/build-reference/apk/).
+
+## 8. Conectar no aplicativo
+
+1. Em **IPv4 do PC**, digite somente o endereço, como `192.168.1.10`, sem `http://`, porta ou `/stats`.
+2. Em **Chave de acesso**, cole somente a chave gerada no terminal; não inclua a palavra `Bearer`.
+3. Toque em **Conectar**.
+4. Confira o status e o horário da última leitura.
+
+O app consulta a porta 8000 e adiciona o cabeçalho de autorização automaticamente. Para trocar IP ou chave, toque em **Desconectar**, altere os campos e conecte novamente.
+
+## Diagnóstico
+
+| Sintoma | O que conferir |
+| --- | --- |
+| `Defina PCSTATS_TOKEN...` ao iniciar | Defina a chave no mesmo terminal do agente |
+| `/health` não abre nem no PC | Confira o processo do servidor e a porta 8000 |
+| `/health` abre no PC, mas não no celular | Confira IPv4, rede, escuta `0.0.0.0` e firewall |
+| Chave de acesso inválida | Use a chave do agente que está executando agora |
+| Tempo limite de 5 segundos | Confira rede, disponibilidade do agente e tempo de coleta |
+| GPU indisponível | Confira os contadores/drivers do Windows; as demais métricas podem continuar funcionando |
+| Dados anteriores na tela | Veja o horário e o erro; a leitura anterior foi preservada |
+| IP que funcionava deixou de funcionar | Execute `ipconfig` novamente; o endereço pode ter mudado |
+
+## Uso local e chave
+
+O token é verificado antes da coleta de métricas, mas HTTP não criptografa a comunicação. Use esta versão apenas em uma rede confiável. Não exponha o agente diretamente à internet.
+
+Não inclua a chave em código, commits, logs compartilhados, imagens ou vídeos. A chave é informada no app e permanece apenas na memória da sessão; não é uma variável que precisa ser enviada ao EAS.

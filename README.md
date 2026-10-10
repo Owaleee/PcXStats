@@ -1,73 +1,139 @@
-# PcXStats
+# PcX Control
 
-Projeto de aprendizado para acompanhar estatísticas de um PC Windows em um aplicativo Android.
+**Acompanhe seu PC pelo celular.**
 
-## Etapa atual
+Aplicativo Android que exibe uso de CPU, memória RAM, espaço ocupado no disco do Windows e utilização de GPU pela rede local. Um agente Python executado no computador coleta as métricas e as entrega por uma API com chave de acesso.
 
-- Agente Python com leitura real de CPU, memória RAM e espaço ocupado no disco.
-- API FastAPI com `/health` e `/stats`; a consulta de métricas exige chave de acesso.
-- Tela mobile com campos de IPv4 e chave, consulta autenticada à API e cartões de CPU, RAM e disco.
+O projeto nasceu como **PcXStats** e passou a se chamar **PcX Control**, acompanhando a intenção de evoluir para um painel de atalhos e controle do computador. A versão **0.1.0** implementa o monitoramento; os recursos de controle fazem parte dos planos futuros.
 
-**A integração com a API está implementada no código; o teste completo no celular ainda precisa ser registrado.** Métricas de GPU e geração do APK serão construídas nas próximas etapas.
+## Experimentar
+
+- [Abrir a build Android testada e baixar o APK](https://expo.dev/accounts/owaleez/projects/pcx-control/builds/dee632f9-b783-4d0d-996f-04ed78fc77ba).
+- [Preparar o agente e conectar o celular](docs/conectar-celular.md).
+- [Consultar os testes e as limitações da validação](docs/testes.md).
+
+O APK foi instalado e testado em um celular Android, sem depender do Expo Go ou do servidor Metro. O computador continua precisando do agente Python aberto e acessível pela rede local. A versão não foi publicada na Play Store; a release no GitHub ainda será preparada.
+
+## Funcionalidades
+
+- Uso total da CPU em percentual.
+- Uso de RAM em percentual e quantidade usada/total em GiB.
+- Espaço ocupado e capacidade total da unidade do Windows.
+- Uso de GPU e nome do adaptador identificado pelo Windows.
+- Conexão manual por IPv4 e chave de acesso.
+- Atualização periódica e horário da última leitura.
+- Mensagens para falha de rede, chave inválida e GPU indisponível.
+- Preservação da última leitura quando uma consulta falha, com indicação de valores anteriores.
+- Pausa das consultas quando o aplicativo sai do primeiro plano.
+
+As funções acima estão presentes no código. Os testes realizados no aparelho e os cenários ainda pendentes estão separados em [docs/testes.md](docs/testes.md).
+
+## Como funciona
+
+```text
+Celular Android                         PC Windows
+React Native + Expo                     Agente Python
+        |                                      |
+        | GET /stats + chave de acesso         |
+        |------------------------------------->| FastAPI
+        |                                      | psutil: CPU, RAM e disco
+        |                                      | PDH + DXGI: GPU
+        |<-------------------------------------|
+        |         JSON com as métricas         |
+        v
+Cartões, barras e horário da leitura
+```
+
+O aplicativo aguarda cada consulta terminar e espera mais 3 segundos para iniciar a próxima. A coleta de CPU e GPU também leva tempo; portanto, o intervalo total entre leituras é maior que 3 segundos.
 
 ## Tecnologias
 
-Python, psutil, FastAPI, Uvicorn, TypeScript, React Native e Expo SDK 57.
+| Parte | Tecnologias |
+| --- | --- |
+| Aplicativo | TypeScript, React 19, React Native 0.86 e Expo SDK 57 |
+| API local | Python, FastAPI, Pydantic e Uvicorn |
+| Métricas do PC | psutil, pywin32/PDH e DXGI via ctypes |
+| Build Android | EAS Build e expo-build-properties |
+| Versionamento | Git, GitHub e GitHub Desktop |
 
-## Estrutura
+## Instalação rápida do agente
 
-```text
-agente/     # coleta e API do PC Windows
-mobile/     # aplicativo Expo com dados simulados
-docs/       # registros de verificacao
-```
-
-## Executar o agente
-
-No PowerShell, na raiz do repositório, com Python 3.10 ou superior instalado:
+Com Python instalado, clone o repositório pelo GitHub Desktop e abra um PowerShell na raiz da cópia local. Execute uma linha por vez:
 
 ```powershell
-py -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r agente/requirements.lock.txt
+py -3.13 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r agente\requirements.lock.txt
 $env:PCSTATS_TOKEN = & .\.venv\Scripts\python.exe -c "import secrets; print(secrets.token_hex(32))"
 Write-Output $env:PCSTATS_TOKEN
-.\.venv\Scripts\python.exe -m uvicorn main:app --app-dir agente --host 127.0.0.1 --port 8000
+.\.venv\Scripts\python.exe -m uvicorn main:app --app-dir agente --host 0.0.0.0 --port 8000
 ```
 
-Abra [a documentação da API](http://127.0.0.1:8000/docs) no navegador do PC. `/health` é público. Em **Authorize**, informe a chave exibida no terminal para testar `/stats`.
+Copie a chave exibida para o aplicativo. Ela é um segredo local: não a publique, não a coloque no código e não a inclua em capturas de tela.
 
-A chave é um segredo local: não a coloque no código ou em imagens públicas. Ela é configurada no terminal em que o agente será iniciado. Este comando escuta somente no próprio PC; o acesso pelo celular será configurado na etapa de integração pela rede local.
+No celular, informe somente o IPv4 do PC, sem `http://` e sem a porta, e cole a chave. Use `ipconfig` no Windows para descobrir o endereço da conexão ativa.
 
-## Executar o aplicativo em desenvolvimento
+Consulte o [guia completo](docs/conectar-celular.md) para requisitos, firewall e diagnóstico de rede. A instalação foi validada com Python 3.13.14; outras versões não foram confirmadas neste projeto.
 
-Com Node.js 22.13 ou superior compatível com o Expo SDK 57 e npm instalados, abra outro terminal na raiz do repositório:
+## Desenvolvimento
+
+Com Node.js e npm instalados, abra outro PowerShell na raiz do repositório:
 
 ```powershell
 cd mobile
 npm.cmd ci
-npx.cmd expo start
+npx.cmd expo start --go --lan
 ```
 
-Abra o projeto no Expo Go compatível com o SDK. Para consultar métricas reais, execute o agente com acesso pela rede local, informe o IPv4 do PC e a chave no aplicativo. Siga [o passo a passo para conectar o celular](docs/conectar-celular.md).
+Abra o projeto no Expo Go compatível com o SDK 57. O agente Python deve continuar executando no outro terminal.
 
-## Verificações de código
-
-Dentro de `mobile`:
+Verificações de código, executadas dentro de `mobile`:
 
 ```powershell
 npm.cmd run typecheck
 npm.cmd run lint
-npx.cmd expo-doctor
 ```
 
-Consulte [o registro de verificação](docs/validacao-mobile.md) para resultados, limites e pendências. Os comandos de análise não substituem os testes de tela no celular.
+Consulte [desenvolvimento e geração do APK](docs/desenvolvimento.md) para detalhes do ambiente e do EAS.
 
-## Próximas etapas
+## Documentação
 
-- Validar a comunicação real entre celular e PC e os estados de erro/recuperação.
-- Acrescentar leitura de GPU pelos contadores do Windows quando disponíveis.
-- Testar o aplicativo em Android e gerar um APK demonstrável.
+| Documento | Conteúdo |
+| --- | --- |
+| [Conectar o celular](docs/conectar-celular.md) | Instalação, rede, chave, APK e diagnóstico |
+| [Arquitetura](docs/arquitetura.md) | Responsabilidades, coleta, atualização e decisões |
+| [API](docs/api.md) | Endpoints, autenticação, campos e exemplos |
+| [Desenvolvimento](docs/desenvolvimento.md) | Ambiente, Expo Go, verificações e build |
+| [Testes](docs/testes.md) | Resultados confirmados e testes pendentes |
+| [Validação técnica](docs/validacao-mobile.md) | Versões, verificações e pendências conhecidas |
+| [Publicação](docs/publicacao.md) | GitHub Desktop, release e apresentação |
+| [Capturas de tela](docs/imagens/README.md) | Como acrescentar imagens reais |
 
-## Aprendizado
+## Limitações atuais
 
-Projeto desenvolvido durante um curso guiado, com apoio de IA, para praticar Python, APIs, desenvolvimento mobile, redes locais e Git/GitHub.
+- Agente para Windows; não foi adaptado para Linux ou macOS.
+- Um computador por conexão, com IPv4 e chave informados manualmente.
+- Comunicação HTTP sem criptografia, destinada a uma rede local confiável.
+- Endereço e chave não são persistidos entre encerramentos do aplicativo.
+- Sem histórico, temperaturas, alertas ou execução de comandos no PC.
+- Leitura de GPU depende dos contadores e drivers do Windows. A validação física foi feita com uma NVIDIA GeForce RTX 3070; AMD, Intel e múltiplas GPUs físicas ainda não foram testadas.
+- Consumo de CPU, RAM, bateria e tráfego ainda não foi medido sistematicamente.
+- Há pendências de revisão das dependências e de alguns testes no APK, descritas na documentação.
+
+## Próximas melhorias
+
+- Consolidar os testes do APK e revisar as dependências.
+- Melhorar a configuração de conexão e a identidade visual.
+- Criar botões para ações predefinidas, começando por controle de mídia.
+- Explorar painéis personalizáveis e perfis para trabalho, jogos e transmissão.
+
+Os planos acima ainda não estão implementados. A evolução para controle do PC também precisará considerar a autorização das ações e a proteção da comunicação.
+
+## Aprendizados
+
+O desenvolvimento permitiu praticar integração entre aplicativo e API, ambientes virtuais Python, autenticação por chave, validação de respostas JSON, estado no React, consultas assíncronas, redes locais e diagnóstico de falhas.
+
+Entre os problemas trabalhados estão a identificação correta da GPU, a distinção entre adaptadores físicos e de software, a configuração do Git para o EAS e um erro de texto solto na renderização nativa.
+
+## Autoria
+
+Desenvolvido por [Owaleee](https://github.com/Owaleee), durante um curso guiado com apoio de IA para explicações, exemplos, revisão e documentação. As alterações e os testes no aparelho foram realizados ao longo desse processo de aprendizado.

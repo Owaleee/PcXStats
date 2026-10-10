@@ -1,43 +1,65 @@
-# Verificação da primeira tela mobile
+# Validação técnica — PcX Control v0.1.0
 
-Data: 10/10/2026.
+Registro consolidado em **10/10/2026**. As verificações técnicas e os testes no aparelho têm escopos diferentes. Consulte também [testes.md](testes.md).
 
-## Escopo
+## Versões verificadas no ambiente local
 
-Primeira tela de CPU, RAM e disco com dados simulados, antes da integração com a API. A verificação considera os arquivos salvos em `mobile/`.
+| Ferramenta/pacote | Versão |
+| --- | --- |
+| Python | 3.13.14 |
+| Node.js | 24.21.0 |
+| npm | 11.19.0 |
+| FastAPI | 0.143.0 |
+| Uvicorn | 0.54.0 |
+| psutil | 7.2.2 |
+| pywin32 | 312 |
+| Expo, faixa declarada | `~57.0.27` |
+| React Native, versão declarada | `0.86.3` |
+| React, versão declarada | `19.2.3` |
+| TypeScript, faixa declarada | `~6.0.3` |
+| expo-build-properties, faixa declarada | `~57.0.22` |
+
+As versões Python foram conferidas no ambiente virtual. Os campos descritos como declarados são os do `package.json`; o `package-lock.json` contém as resoluções do npm.
 
 ## Verificações executadas
 
-- TypeScript: `tsc --noEmit`, aprovado.
-- ESLint: `expo lint App.tsx index.ts --no-cache`, aprovado após configurar as dependências de análise.
-- Expo Doctor: 21 de 21 verificações aprovadas.
-- Git: pasta mobile dentro do repositório da raiz, sem repositório Git aninhado.
-- `.gitignore`: dependências, `.expo`, ambiente Python e caches excluídos.
+Antes da primeira build APK, os comandos abaixo terminaram sem erros:
 
-Ambiente: Node.js 24.21.0; Expo ~57.0.27; React Native 0.86.3; React 19.2.3; TypeScript ~6.0.3. O lock do npm registra as versões resolvidas.
+```powershell
+npm.cmd run typecheck
+npm.cmd run lint
+```
 
-## Pendência de dependências
+O Expo reconheceu a configuração pública do app, incluindo nome, identificador Android e plugin de HTTP. O EAS concluiu a build `dee632f9-b783-4d0d-996f-04ed78fc77ba`, e o autor confirmou instalação e funcionamento em Android físico.
 
-A auditoria `npm audit` reportou 22 alertas (7 moderados e 15 altos), relacionados à árvore de dependências do Expo/React Native. A compatibilidade aprovada pelo Expo Doctor não equivale a uma auditoria de segurança aprovada.
+Um registro anterior do projeto informa **21 de 21 verificações aprovadas no Expo Doctor** durante a construção da primeira tela. Esse resultado é histórico e não deve ser apresentado como uma nova execução após todas as alterações.
 
-As sugestões automáticas da auditoria incluem versões antigas e incompatíveis com a base SDK 57. Não foi aplicado `npm audit fix --force`. A revisão dos avisos e das correções compatíveis permanece pendente antes de uma distribuição final. O commit desta etapa registra um protótipo de aprendizado.
+## Auditoria de dependências
 
-## Ainda não comprovado por esta verificação
+Durante a instalação de `expo-build-properties`, o npm informou **22 vulnerabilidades: 7 moderadas e 15 altas**. Esse número descreve a saída daquela instalação; não foi feita uma nova auditoria ao preparar esta documentação.
 
-- Renderização da tela e resposta do botão em um Android físico.
-- Integração do app com as métricas reais do agente.
-- Funcionamento de GPU.
-- Build e instalação do APK.
+A análise de impacto e das correções compatíveis permanece pendente. Não foi aplicado `npm audit fix --force`. Aprovação de TypeScript, ESLint, Expo Doctor ou build não equivale a uma auditoria de segurança aprovada.
 
-Registre o modelo do aparelho, a versão Android, a abertura da tela no Expo Go e a alteração de CPU de 25% para 72% ao tocar no botão antes de marcar o teste visual como concluído.
+Para revisar a situação atual dentro de `mobile`:
 
-## Revisão da integração com a API — 10/10/2026
+```powershell
+npm.cmd audit
+```
 
-Esta revisão sucede a etapa simulada descrita acima. A tela atual contém IPv4, chave de acesso e consulta periódica ao agente.
+Examine os caminhos das dependências, a aplicabilidade dos avisos e a compatibilidade das correções antes de atualizar. A primeira distribuição é uma demonstração de aprendizado, não uma versão comercial validada.
 
-- Ajustado o status para derivar da conexão e do estado do app; atualizações associadas a eventos e respostas da rede mantidas fora do corpo síncrono do efeito.
-- Comando de lint ampliado para verificar também `src/`.
-- TypeScript e ESLint aprovados no código integrado.
-- Servidor temporário local: `/health` respondeu 200; `/stats` sem chave respondeu 401; `/stats` com chave respondeu 200 com os oito campos esperados.
-- Servidor temporário encerrado após o teste; o teste não exibiu nem persistiu a chave gerada.
-- Comunicação celular–PC, comportamento visual, retomada e APK continuam sem validação física nesta revisão.
+## Pendências de apresentação e precisão
+
+- Registrar modelo do celular, versão Android e versão do Windows.
+- Completar os testes pendentes específicos do APK.
+- Acrescentar imagens reais e, se disponível, vídeo de demonstração.
+- Alinhar o título interno da tela, que ainda usa `PC Stats`, ao nome `PcX Control` definido no `app.json`.
+- Revisar o detalhe do cartão de GPU: o texto atual menciona `3D`, mas o cálculo usa o motor mais ocupado entre os contadores disponíveis. Um rótulo mais preciso é `Uso da GPU · motor mais ocupado`.
+
+As duas últimas pendências exigem alteração no código da interface e uma nova build para aparecerem no APK já distribuído. A documentação não altera esses componentes.
+
+## Performance e compatibilidade
+
+Não há medição sistemática de CPU/RAM do agente, bateria do celular, tráfego ou estabilidade prolongada. A arquitetura contém esperas entre amostras e consultas, mas isso não substitui uma medição real.
+
+A coleta usa APIs do Windows sem exigir uma biblioteca de uma fabricante específica. A confirmação em hardware foi feita com a RTX 3070. Compatibilidade com outras placas permanece a validar.
