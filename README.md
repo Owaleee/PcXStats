@@ -6,9 +6,9 @@ Projeto de aprendizado para acompanhar estatísticas de um PC Windows em um apli
 
 - Agente Python com leitura real de CPU, memória RAM e espaço ocupado no disco.
 - API FastAPI com `/health` e `/stats`; a consulta de métricas exige chave de acesso.
-- Primeira tela mobile com cartões de CPU, RAM e disco e botão para simular uma nova leitura.
+- Tela mobile com campos de IPv4 e chave, consulta autenticada à API e cartões de CPU, RAM e disco.
 
-**A tela mobile ainda usa dados simulados e não consulta a API.** Integração com o agente, métricas de GPU e geração do APK serão construídas nas próximas etapas.
+**A integração com a API está implementada no código; o teste completo no celular ainda precisa ser registrado.** Métricas de GPU e geração do APK serão construídas nas próximas etapas.
 
 ## Tecnologias
 
@@ -48,7 +48,7 @@ npm.cmd ci
 npx.cmd expo start
 ```
 
-Abra o projeto no Expo Go compatível com o SDK. A tela mostra valores simulados: o botão altera CPU de 25% para 72%. Nenhuma chave do agente é necessária para essa tela inicial.
+Abra o projeto no Expo Go compatível com o SDK. Para consultar métricas reais, execute o agente com acesso pela rede local, informe o IPv4 do PC e a chave no aplicativo. Siga [o passo a passo para conectar o celular](docs/conectar-celular.md).
 
 ## Verificações de código
 
@@ -64,8 +64,7 @@ Consulte [o registro de verificação](docs/validacao-mobile.md) para resultados
 
 ## Próximas etapas
 
-- Conectar o aplicativo à API e exibir métricas reais.
-- Tratar erros, atualização periódica e estado da conexão.
+- Validar a comunicação real entre celular e PC e os estados de erro/recuperação.
 - Acrescentar leitura de GPU pelos contadores do Windows quando disponíveis.
 - Testar o aplicativo em Android e gerar um APK demonstrável.
 

@@ -30,3 +30,14 @@ As sugestões automáticas da auditoria incluem versões antigas e incompatívei
 - Build e instalação do APK.
 
 Registre o modelo do aparelho, a versão Android, a abertura da tela no Expo Go e a alteração de CPU de 25% para 72% ao tocar no botão antes de marcar o teste visual como concluído.
+
+## Revisão da integração com a API — 10/10/2026
+
+Esta revisão sucede a etapa simulada descrita acima. A tela atual contém IPv4, chave de acesso e consulta periódica ao agente.
+
+- Ajustado o status para derivar da conexão e do estado do app; atualizações associadas a eventos e respostas da rede mantidas fora do corpo síncrono do efeito.
+- Comando de lint ampliado para verificar também `src/`.
+- TypeScript e ESLint aprovados no código integrado.
+- Servidor temporário local: `/health` respondeu 200; `/stats` sem chave respondeu 401; `/stats` com chave respondeu 200 com os oito campos esperados.
+- Servidor temporário encerrado após o teste; o teste não exibiu nem persistiu a chave gerada.
+- Comunicação celular–PC, comportamento visual, retomada e APK continuam sem validação física nesta revisão.
