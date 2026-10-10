@@ -8,7 +8,7 @@ import psutil
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field
-
+from gpu import capturar_amostras_gpu, resumir_uso_gpu
 
 TOKEN = os.environ.get("PCSTATS_TOKEN", "")
 if len(TOKEN) < 32 or not TOKEN.isascii():
@@ -21,6 +21,12 @@ app = FastAPI(title="PC Stats", version="0.1.0")
 bearer = HTTPBearer(auto_error=False)
 
 
+class GpuStats(BaseModel):
+    id: str
+    name: str
+    usage_percent: float = Field(ge=0, le=100)
+
+
 class Stats(BaseModel):
     cpu_percent: float = Field(ge=0, le=100)
     ram_percent: float = Field(ge=0, le=100)
@@ -30,6 +36,8 @@ class Stats(BaseModel):
     disk_used_gib: float = Field(ge=0)
     disk_total_gib: float = Field(gt=0)
     sampled_at: datetime
+    gpus: list[GpuStats]
+    gpu_error: str | None
 
 
 def require_token(
@@ -52,13 +60,26 @@ def health():
 
 @app.get("/stats", response_model=Stats, dependencies=[Depends(require_token)])
 def stats():
-    # A janela de 0,2 s evita a primeira leitura sem referência de interval=None.
-    # Esta rota usa def: FastAPI executa a função síncrona em uma thread.
     cpu = psutil.cpu_percent(interval=0.2)
     ram = psutil.virtual_memory()
     disk = psutil.disk_usage(DISK_ROOT)
 
-    # Memória em uso = total - disponível. Pode diferir de outros monitores.
+    try:
+        gpus = [
+            GpuStats(**gpu)
+            for gpu in resumir_uso_gpu(capturar_amostras_gpu())
+        ]
+
+        gpu_error = (
+            None
+            if gpus
+            else "Leitura de GPU indisponível neste PC."
+        )
+
+    except Exception:
+        gpus = []
+        gpu_error = "Não foi possível consultar a GPU."
+
     return Stats(
         cpu_percent=cpu,
         ram_percent=ram.percent,
@@ -68,4 +89,6 @@ def stats():
         disk_used_gib=round(disk.used / GIB, 2),
         disk_total_gib=round(disk.total / GIB, 2),
         sampled_at=datetime.now(timezone.utc),
+        gpus=gpus,
+        gpu_error=gpu_error,
     )

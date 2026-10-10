@@ -196,7 +196,24 @@ export default function App() {
                 title="Disco do Windows"
                 percent={stats.disk_percent}
                 detail={`${stats.disk_used_gib.toFixed(1)} / ${stats.disk_total_gib.toFixed(1)} GiB ocupados`}
-              />
+              />                           {stats.gpus.map((gpu) => (
+                <MetricCard
+                  key={gpu.id}
+                  title={gpu.name}
+                  percent={gpu.usage_percent}
+                  detail="Uso da GPU · 3D"
+                />
+              ))}
+
+              {stats.gpus.length === 0 ? (
+                <View style={styles.card}>
+                  <Text style={styles.label}>GPU</Text>
+
+                  <Text style={styles.detail}>
+                    {stats.gpu_error ?? 'Leitura de GPU indisponível.'}
+                  </Text>
+                </View>
+              ) : null}
             </>
           ) : <Text style={styles.detail}>Conecte para receber a primeira leitura.</Text>}
         </ScrollView>
