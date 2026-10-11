@@ -139,7 +139,7 @@ export default function App() {
     <SafeAreaProvider>
       <SafeAreaView style={styles.safe}>
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-          <Text style={styles.heading}>PC Stats</Text>
+          <Text style={styles.heading}>PcX Control</Text>
           <Text style={styles.detail}>Seu computador, no celular · rede local</Text>
           <Text style={styles.status} accessibilityLiveRegion="polite">
             {LABELS[status]}
@@ -196,20 +196,18 @@ export default function App() {
                 title="Disco do Windows"
                 percent={stats.disk_percent}
                 detail={`${stats.disk_used_gib.toFixed(1)} / ${stats.disk_total_gib.toFixed(1)} GiB ocupados`}
-             />
-             {stats.gpus.map((gpu) => (
+              />
+              {stats.gpus.map((gpu) => (
                 <MetricCard
                   key={gpu.id}
                   title={gpu.name}
                   percent={gpu.usage_percent}
-                  detail="Uso da GPU · 3D"
+                  detail="Uso da GPU · motor mais ocupado"
                 />
               ))}
-
               {stats.gpus.length === 0 ? (
                 <View style={styles.card}>
                   <Text style={styles.label}>GPU</Text>
-
                   <Text style={styles.detail}>
                     {stats.gpu_error ?? 'Leitura de GPU indisponível.'}
                   </Text>

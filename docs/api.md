@@ -8,7 +8,7 @@ Implementação: `agente/main.py`. Porta usada pelo aplicativo: `8000`.
 | --- | --- | --- | --- |
 | GET | `/health` | Não | Verificar se o agente responde |
 | GET | `/stats` | Bearer token | Coletar e devolver as métricas |
-| GET | `/docs` | Não | Abrir a documentação interativa gerada pelo FastAPI |
+| GET | `/docs` | Não | Documentação interativa do FastAPI; só existe se o agente for iniciado com `PCSTATS_DOCS=1` |
 
 ## Autenticação
 
@@ -131,7 +131,7 @@ A variável de ambiente não é automaticamente compartilhada entre terminais in
 
 ## Testar em /docs
 
-1. No PC, abra `http://127.0.0.1:8000/docs`.
+1. Inicie o agente com a variável `PCSTATS_DOCS=1` definida (`$env:PCSTATS_DOCS = "1"` no PowerShell, antes do `uvicorn`). Sem ela, `/docs` fica desligado de propósito, porque não exige chave. Depois, no PC, abra `http://127.0.0.1:8000/docs`.
 2. Execute `/health` e confira **200**.
 3. Execute `/stats` sem autorização e confira **401**.
 4. Clique em **Authorize**, cole somente a chave e confirme.

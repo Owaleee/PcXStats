@@ -11,7 +11,6 @@ agente/
   main.py                 API, autenticação e composição da resposta
   gpu.py                  Coleta PDH e resumo do uso por adaptador
   adaptadores_gpu.py       Identificação de adaptadores pelo DXGI
-  metricas.py              Exercício inicial de coleta no terminal
   requirements.txt        Dependências diretas
   requirements.lock.txt   Versões fixadas do ambiente Python
 

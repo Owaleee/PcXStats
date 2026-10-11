@@ -28,6 +28,14 @@ O APK foi instalado e testado em um celular Android, sem depender do Expo Go ou 
 
 As funções acima estão presentes no código. Os testes realizados no aparelho e os cenários ainda pendentes estão separados em [docs/testes.md](docs/testes.md).
 
+## Capturas de tela
+
+Capturas reais da build testada, feitas quando o título da tela ainda era "PC Stats".
+
+| Conectado | Métricas | Falha de conexão |
+| --- | --- | --- |
+| <img src="docs/imagens/conectado.jpg" width="240" alt="Tela conectada com IPv4 e chave"> | <img src="docs/imagens/metricas.jpg" width="240" alt="Cartões de CPU, RAM, disco e GPU"> | <img src="docs/imagens/falha-conexao.jpg" width="240" alt="Mensagem de tempo limite de resposta"> |
+
 ## Como funciona
 
 ```text
@@ -106,7 +114,7 @@ Consulte [desenvolvimento e geração do APK](docs/desenvolvimento.md) para deta
 | [Testes](docs/testes.md) | Resultados confirmados e testes pendentes |
 | [Validação técnica](docs/validacao-mobile.md) | Versões, verificações e pendências conhecidas |
 | [Publicação](docs/publicacao.md) | GitHub Desktop, release e apresentação |
-| [Capturas de tela](docs/imagens/README.md) | Como acrescentar imagens reais |
+| [Capturas de tela](docs/imagens/README.md) | Imagens reais do aplicativo |
 
 ## Limitações atuais
 

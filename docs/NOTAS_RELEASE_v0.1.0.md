@@ -19,7 +19,7 @@ Primeira versão de demonstração do PcX Control: acompanhe métricas de um PC 
 3. Com PC e celular na mesma rede confiável, informe o IPv4 do PC e a chave no aplicativo.
 4. Toque em **Conectar**.
 
-Consulte as [instruções do projeto](https://github.com/Owaleee/PcXStats) para executar o agente. O computador precisa permanecer ligado, com o agente aberto.
+Consulte as [instruções do projeto](https://github.com/Owaleee/PcX_Control) para executar o agente. O computador precisa permanecer ligado, com o agente aberto.
 
 ## Validação conhecida
 

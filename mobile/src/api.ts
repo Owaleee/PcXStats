@@ -14,10 +14,9 @@ function isStats(value: unknown): value is Stats {
   if (![data.cpu_percent, data.ram_percent, data.disk_percent].every(
     (value) => (value as number) <= 100
   )) return false;
-    if (!Array.isArray(data.gpus) || !data.gpus.every(isGpuStats)) {
+  if (!Array.isArray(data.gpus) || !data.gpus.every(isGpuStats)) {
     return false;
   }
-
   if (data.gpu_error !== null && typeof data.gpu_error !== 'string') {
     return false;
   }

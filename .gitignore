@@ -25,3 +25,7 @@ dist/
 *.log
 Thumbs.db
 .DS_Store
+
+# Editores
+.vscode/
+.idea/

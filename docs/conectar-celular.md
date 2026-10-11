@@ -13,7 +13,7 @@ Para usar o APK pronto, Node.js e Expo Go não são necessários. Eles são usad
 
 ## 2. Obter o código
 
-No GitHub Desktop, use **File → Clone repository → URL**, informe `https://github.com/Owaleee/PcXStats.git` e escolha a pasta local.
+No GitHub Desktop, use **File → Clone repository → URL**, informe `https://github.com/Owaleee/PcX_Control.git` e escolha a pasta local.
 
 Abra um PowerShell na raiz da pasta clonada. Ela deve conter as pastas `agente` e `mobile`.
 

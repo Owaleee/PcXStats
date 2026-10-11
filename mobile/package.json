@@ -1,6 +1,6 @@
 {
-  "name": "mobile",
-  "version": "1.0.0",
+  "name": "pcx-control",
+  "version": "0.1.0",
   "main": "index.ts",
   "dependencies": {
     "expo": "~57.0.27",
@@ -19,8 +19,6 @@
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web",
     "lint": "expo lint App.tsx index.ts src",
     "typecheck": "tsc --noEmit"
   },

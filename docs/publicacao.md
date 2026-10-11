@@ -13,7 +13,7 @@ Não marque testes como aprovados apenas porque existe tratamento no código. Se
 
 ## 2. Revisar no GitHub Desktop
 
-1. Selecione o repositório correto, `PcXStats`.
+1. Selecione o repositório correto, `PcX_Control`.
 2. Abra **Changes** e leia o diff dos documentos.
 3. Confirme que a lista contém os arquivos esperados e que não há token, `.env`, ambiente virtual, dependências instaladas ou credenciais de assinatura.
 4. Faça o commit:
@@ -25,7 +25,7 @@ docs: documenta a primeira versao do PcX Control
 5. Clique em **Push origin**.
 6. Use **Repository → View on GitHub** e confira o README renderizado.
 
-O nome do repositório pode continuar `PcXStats`. O nome apresentado do produto é PcX Control; os links deste pacote usam o endereço atual do repositório.
+O repositório se chama `PcX_Control` e o nome apresentado do produto é PcX Control.
 
 ## 3. Baixar o APK testado
 
@@ -35,7 +35,7 @@ Você pode renomear o arquivo para `pcx-control-v0.1.0.apk`. Renomear o arquivo 
 
 ## 4. Preparar a release no GitHub
 
-1. Abra [o repositório](https://github.com/Owaleee/PcXStats).
+1. Abra [o repositório](https://github.com/Owaleee/PcX_Control).
 2. Acesse **Releases** e **Draft a new release**.
 3. Em **Choose a tag**, crie `v0.1.0`, se essa tag ainda não existir.
 4. Escolha o commit/branch revisado correspondente ao código da build. A branch usada no projeto é `main`.

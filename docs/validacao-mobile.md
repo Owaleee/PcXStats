@@ -53,10 +53,7 @@ Examine os caminhos das dependências, a aplicabilidade dos avisos e a compatibi
 - Registrar modelo do celular, versão Android e versão do Windows.
 - Completar os testes pendentes específicos do APK.
 - Acrescentar imagens reais e, se disponível, vídeo de demonstração.
-- Alinhar o título interno da tela, que ainda usa `PC Stats`, ao nome `PcX Control` definido no `app.json`.
-- Revisar o detalhe do cartão de GPU: o texto atual menciona `3D`, mas o cálculo usa o motor mais ocupado entre os contadores disponíveis. Um rótulo mais preciso é `Uso da GPU · motor mais ocupado`.
-
-As duas últimas pendências exigem alteração no código da interface e uma nova build para aparecerem no APK já distribuído. A documentação não altera esses componentes.
+- Gerar uma nova build e testá-la no aparelho. O título da tela (`PcX Control`) e o detalhe do cartão de GPU (`Uso da GPU · motor mais ocupado`) já foram corrigidos no código, mas o APK `dee632f9-b783-4d0d-996f-04ed78fc77ba` ainda mostra `PC Stats` e `3D`.
 
 ## Performance e compatibilidade
 

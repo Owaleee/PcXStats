@@ -1,5 +1,6 @@
-"""Agente didático do PC Stats: executar no PC Windows monitorado."""
+"""Agente didático do PcX Control: executar no PC Windows monitorado."""
 
+import logging
 import os
 import secrets
 from datetime import datetime, timezone
@@ -17,7 +18,20 @@ if len(TOKEN) < 32 or not TOKEN.isascii():
 DISK_ROOT = os.environ.get("SystemDrive", "C:") + "\\"
 GIB = 1024 ** 3
 
-app = FastAPI(title="PC Stats", version="0.1.0")
+logger = logging.getLogger("uvicorn.error")
+
+# /docs e /openapi.json ficam desligados por padrão: não exigem chave e
+# mostram a estrutura da API a quem estiver na rede. Para testar em /docs,
+# defina PCSTATS_DOCS=1 antes de iniciar o agente.
+EXPOR_DOCS = os.environ.get("PCSTATS_DOCS") == "1"
+
+app = FastAPI(
+    title="PcX Control",
+    version="0.1.0",
+    docs_url="/docs" if EXPOR_DOCS else None,
+    redoc_url=None,
+    openapi_url="/openapi.json" if EXPOR_DOCS else None,
+)
 bearer = HTTPBearer(auto_error=False)
 
 
@@ -77,6 +91,7 @@ def stats():
         )
 
     except Exception:
+        logger.exception("Falha ao consultar a GPU")
         gpus = []
         gpu_error = "Não foi possível consultar a GPU."
 
